@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
-import { db } from './firebaseConnection'
+import { db, auth } from './firebaseConnection'
 import { doc, setDoc, collection, addDoc, getDoc, getDocs, updateDoc, deleteDoc, onSnapshot } from 'firebase/firestore'
+import { createUserWithEmailAndPassword } from 'firebase/auth'
 import './App.css'
 
 function App() {
@@ -8,6 +9,9 @@ function App() {
     const [titulo, setTitulo] = useState('');
     const [autor, setAutor] = useState('');
     const [idPost, setIdPost] = useState('');
+
+    const [email, setEmail] = useState('');
+    const [senha, setSenha] = useState('');
 
     const [posts, setPosts] = useState([]);
 
@@ -95,12 +99,49 @@ function App() {
             })
     }
 
+    async function novoUsuario() {
+        await createUserWithEmailAndPassword(auth, email, senha)
+            .then(() => {
+                console.log("cadastrado com sucesso")
+                setEmail('')
+                setSenha('')
+            })
+            .catch((error) => {
+                if (error.code === 'auth/weak-password') {
+                    alert("senha muito fraca.")
+                } else if (error.code === 'auth/email-already-in-use') {
+                    alert("e-mail já em uso")
+                }
+            })
+    }
+
     return (
         <div>
             <h1>Firebase</h1>
+
+            <div className="container">
+                <h2>Usuários</h2>
+                <label>E-mail</label>
+                <input
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="digite seu e-mail"
+                /> <br />
+                <input
+                    value={senha}
+                    onChange={(e) => setSenha(e.target.value)}
+                    placeholder="digite sua senha"
+                /> <br />
+
+                <button onClick={novoUsuario}>cadastrar</button>
+            </div>
+            <br />
+            <hr />
+            <br />
             <div className="container">
                 <label>ID do Post: </label>
                 <input
+
                     placeholder="Digite ID do post"
                     value={idPost}
                     onChange={(e) => setIdPost(e.target.value)}
